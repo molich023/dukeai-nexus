@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Build and run the DukeAI Nexus C++ prototype locally."><title>Get started — DukeAI Nexus</title><link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/css/style.css"><script src="assets/js/main.js" defer></script></head>
+<body>
+<header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">D</span><span>DukeAI <b>Nexus</b></span></a><button class="menu-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button><nav id="site-nav" class="site-nav"><a href="index.html">Home</a><a href="about.html">About</a><a href="features.html">Prototype</a><a href="documentation.html">Documentation</a><a aria-current="page" href="downloads.html">Get started</a><a href="contribute.html">Contribute</a></nav></header>
+<main class="page">
+<p class="eyebrow">LOCAL BUILD</p><h1>Build DukeAI Nexus on your device.</h1><p class="lead">The current release path is to clone the source repository and build the C++ prototype locally. There is no prebuilt Android app or browser-based AI service at this stage.</p>
+<section class="content-section"><h2>1. Get the source</h2><pre><code>git clone https://github.com/molich023/dukeai-nexus.git
+cd dukeai-nexus</code></pre><p>If the repository has not yet been made public, this clone command will not work for visitors until publication is complete.</p></section>
+<section class="content-section"><h2>2. Android (Termux)</h2><p>Install Termux, update packages, and install the build dependencies:</p><pre><code>pkg update
+pkg upgrade
+pkg install git clang cmake pkg-config jsoncpp</code></pre></section>
+<section class="content-section"><h2>3. Linux (Debian/Ubuntu example)</h2><p>Install the compiler, CMake, pkg-config, JsonCpp development headers, and Git:</p><pre><code>sudo apt update
+sudo apt install git build-essential cmake pkg-config libjsoncpp-dev</code></pre><p>Package names and availability may vary by Linux distribution.</p></section>
+<section class="content-section"><h2>4. Configure and build</h2><pre><code>cmake -S . -B build
+cmake --build build</code></pre></section>
+<section class="content-section"><h2>5. Run tests</h2><pre><code>ctest --test-dir build --output-on-failure</code></pre></section>
+<section class="content-section"><h2>6. Run the demonstration</h2><pre><code>./build/dukeai_demo data/demo</code></pre><p>The demo retrieves existing English and Kiswahili water-conservation passages. Retrieved passages are source text, not generated answers.</p></section>
+<section class="content-section status-panel"><h2>Before you begin</h2><p>Build and test results should be checked on your own device. The current prototype is a research tool, not a production-ready AI assistant. See the <a href="features.html">implementation status</a> and <a href="documentation.html">documentation</a>.</p></section>
+</main>
+<footer class="site-footer"><a class="brand" href="index.html"><span class="brand-mark">D</span><span>DukeAI <b>Nexus</b></span></a><small>© 2026 DukeAI Nexus contributors.</small></footer>
+</body></html>
