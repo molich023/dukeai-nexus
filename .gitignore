@@ -1,0 +1,89 @@
+# ==================================================
+# DukeAI Nexus - Git Ignore Rules
+# ==================================================
+
+# CMake build directories
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+
+# Compiled objects and libraries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Executables generated locally
+dukeai_demo
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# Python environments and caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# ==================================================
+# PRIVATE RESEARCH MATERIALS
+# ==================================================
+
+# Default-deny local datasets.
+# Only approved demonstration files are allowed.
+data/*
+
+# Allow approved demo directory and its contents.
+!data/demo/
+!data/demo/**
+
+# Keep private books and extracted research out of Git.
+data/books/
+data/extracted/
+
+# Local model files and checkpoints
+models/
+checkpoints/
+*.gguf
+*.safetensors
+*.bin
+
+# ==================================================
+# LOCAL EXPERIMENTS
+# ==================================================
+
+experiments/
+scratch/
+local-output/
+reports/private/
+
+# End of DukeAI Nexus ignore rules
