@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="220" viewBox="0 0 960 220" role="img" aria-labelledby="title desc">
+  <title id="title">DukeAI Nexus</title>
+  <desc id="desc">DukeAI Nexus project mark and wordmark.</desc>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16A6A1"/>
+      <stop offset="1" stop-color="#D5A84B"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="196" height="196" rx="42" fill="#10233F"/>
+  <path d="M110 42 164 73v62l-54 31-54-31V73z" fill="none" stroke="url(#g)" stroke-width="9" stroke-linejoin="round"/>
+  <path d="M82 91h28c19 0 31 12 31 29s-12 29-31 29H82z" fill="none" stroke="#F4F7FA" stroke-width="10" stroke-linejoin="round"/>
+  <circle cx="163" cy="76" r="8" fill="#D5A84B"/>
+  <circle cx="56" cy="135" r="7" fill="#16A6A1"/>
+  <text x="248" y="112" fill="#10233F" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="76" font-weight="700" letter-spacing="-2">DukeAI <tspan fill="#168D8A">Nexus</tspan></text>
+  <text x="253" y="158" fill="#536579" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="25" letter-spacing="3">LOCAL KNOWLEDGE · OPEN RESEARCH</text>
+</svg>

@@ -1,1 +1,7 @@
-
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">DukeAI Nexus</title>
+  <rect width="64" height="64" rx="14" fill="#10233F"/>
+  <path d="M32 8 52 20v24L32 56 12 44V20z" fill="none" stroke="#16A6A1" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M23 23h10c7 0 11 4 11 9s-4 9-11 9H23z" fill="none" stroke="#F4F7FA" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="51" cy="20" r="3" fill="#D5A84B"/>
+</svg>
