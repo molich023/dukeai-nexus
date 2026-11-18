@@ -1,0 +1,21 @@
+
+{
+  "source_id": "dukeai_public_test_source_001",
+  "title": "Community Water Learning — Public Test Fixture",
+  "authors": [
+    "DukeAI Nexus Test Contributors"
+  ],
+  "publication_year": 2024,
+  "page_count": 2,
+  "language": "English",
+  "subject": [
+    "Science",
+    "Community Learning"
+  ],
+  "rights_status": "UNVERIFIED",
+  "redistribution_allowed": false,
+  "public_training_use": false,
+  "extraction_status": "COMPLETED",
+  "extracted_words": 42,
+  "review_status": "PENDING"
+}
