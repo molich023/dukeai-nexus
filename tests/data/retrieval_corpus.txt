@@ -1,0 +1,9 @@
+A finite automaton is a mathematical model of computation. It consists of a finite set of states, an input alphabet, transition rules, an initial state, and accepting states.
+
+A deterministic finite automaton has exactly one transition for each state and input symbol. Its next state is uniquely determined by the current state and input.
+
+A regular language is a set of strings that can be recognized by a finite automaton. Regular languages can also be described using regular expressions.
+
+A context-free grammar contains production rules that describe how strings in a language can be generated. Such grammars are useful for describing nested structures.
+
+A pushdown automaton extends a finite automaton with a stack. The stack allows it to recognize certain context-free languages that finite automata cannot recognize.
