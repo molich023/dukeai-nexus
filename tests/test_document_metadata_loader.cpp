@@ -86,29 +86,64 @@ private:
 
 } // namespace
 
-int main(int argc, char* argv[]) {
+int main(int argc, char*[]) {
     try {
-        if (argc != 2) {
+        if (argc != 1) {
             throw std::runtime_error(
-                "Expected path to textbook metadata JSON"
+                "This test does not require external files"
             );
         }
 
         dukeai::DocumentMetadataLoader loader;
+        TemporaryDirectory temporary;
+
+        // Synthetic public test fixture.
+        // It contains no private or copyrighted textbook data.
+        const std::string fixture_json = R"({
+            "source_id": "dukeai_public_fixture_v1",
+            "title": "DukeAI Nexus Public Metadata Loader Fixture",
+            "authors": [
+                "Example Author One",
+                "Example Author Two"
+            ],
+            "edition": "Test Edition",
+            "publication_year": 2026,
+            "publisher": "DukeAI Nexus Test Fixtures",
+            "document_format": "JSON",
+            "page_count": 12,
+            "language": "English",
+            "subject": [
+                "Civic education",
+                "Science"
+            ],
+            "rights_status": "UNVERIFIED",
+            "redistribution_allowed": false,
+            "public_training_use": false,
+            "local_research_use": "TEST_ONLY",
+            "extraction_status": "COMPLETED",
+            "extracted_words": 2500,
+            "review_status": "PENDING"
+        })";
+
+        const auto fixture_path =
+            temporary.write(
+                "public_metadata.json",
+                fixture_json
+            );
 
         const auto metadata =
-            loader.load_json_file(argv[1]);
+            loader.load_json_file(fixture_path.string());
 
         check(
             metadata.source_id ==
-                "tcs_mishra_chandrasekaran_2008",
-            "actual metadata source ID"
+                "dukeai_public_fixture_v1",
+            "synthetic fixture source ID"
         );
 
         check(
             metadata.title ==
-                "Theory of Computer Science: Automata, Languages and Computation",
-            "actual metadata title"
+                "DukeAI Nexus Public Metadata Loader Fixture",
+            "synthetic fixture title"
         );
 
         check(
@@ -118,24 +153,26 @@ int main(int argc, char* argv[]) {
 
         check(
             metadata.publication_year.has_value() &&
-                *metadata.publication_year == 2008,
+                *metadata.publication_year == 2026,
             "publication year mapping"
         );
 
         check(
             metadata.page_count.has_value() &&
-                *metadata.page_count == 434,
+                *metadata.page_count == 12,
             "page count mapping"
         );
 
         check(
-            metadata.subjects.size() == 4,
+            metadata.subjects.size() == 2 &&
+                metadata.subjects[0] == "Civic education" &&
+                metadata.subjects[1] == "Science",
             "singular subject array mapping"
         );
 
         check(
             metadata.extracted_words.has_value() &&
-                *metadata.extracted_words == 149116,
+                *metadata.extracted_words == 2500,
             "extracted word count mapping"
         );
 
@@ -145,8 +182,6 @@ int main(int argc, char* argv[]) {
                 !metadata.public_training_use,
             "rights restrictions preserved"
         );
-
-        TemporaryDirectory temporary;
 
         const std::string valid_json = R"({
             "source_id": "test_book",
