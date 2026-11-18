@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v      
 
       - name: Install dependencies
         run: |
