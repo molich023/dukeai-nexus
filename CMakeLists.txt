@@ -49,19 +49,34 @@ target_link_libraries(dukeai_retrieval_tests PRIVATE dukeai_energy)
 add_executable(dukeai_document_loader_tests
     tests/test_document_loader.cpp
 )
-target_link_libraries(dukeai_document_loader_tests PRIVATE dukeai_energy)
+target_link_libraries(
+    dukeai_document_loader_tests
+    PRIVATE dukeai_energy
+)
 
 add_executable(dukeai_document_ingestion_tests
     tests/test_document_ingestion.cpp
 )
 target_link_libraries(
-    dukeai_document_ingestion_tests PRIVATE dukeai_energy
+    dukeai_document_ingestion_tests
+    PRIVATE dukeai_energy
 )
 
 add_executable(dukeai_document_metadata_tests
     tests/test_document_metadata.cpp
 )
-target_link_libraries(dukeai_document_metadata_tests PRIVATE dukeai_energy)
+target_link_libraries(
+    dukeai_document_metadata_tests
+    PRIVATE dukeai_energy
+)
+
+add_executable(dukeai_document_metadata_loader_tests
+    tests/test_document_metadata_loader.cpp
+)
+target_link_libraries(
+    dukeai_document_metadata_loader_tests
+    PRIVATE dukeai_energy
+)
 
 # Register tests
 enable_testing()
@@ -72,27 +87,36 @@ add_test(
             ${CMAKE_CURRENT_SOURCE_DIR}/tests/data/ranking_pairs.tsv
 )
 
-add_executable(dukeai_document_metadata_loader_tests
-    tests/test_document_metadata_loader.cpp
+add_test(
+    NAME text_processing_test
+    COMMAND dukeai_text_tests
 )
 
-target_link_libraries(
-    dukeai_document_metadata_loader_tests
-    PRIVATE dukeai_energy
+add_test(
+    NAME retrieval_test
+    COMMAND dukeai_retrieval_tests
 )
-add_test(NAME text_processing_test COMMAND dukeai_text_tests)
-add_test(NAME retrieval_test COMMAND dukeai_retrieval_tests)
-add_test(NAME document_loader_test COMMAND dukeai_document_loader_tests)
-add_test(NAME document_metadata_test COMMAND dukeai_document_metadata_tests)
+
+add_test(
+    NAME document_loader_test
+    COMMAND dukeai_document_loader_tests
+)
+
+add_test(
+    NAME document_metadata_test
+    COMMAND dukeai_document_metadata_tests
+)
+
 add_test(
     NAME document_ingestion_test
     COMMAND dukeai_document_ingestion_tests
 )
 
+# This test creates its own synthetic metadata fixture.
+# It must not depend on private or copyrighted research data.
 add_test(
     NAME document_metadata_loader_test
     COMMAND dukeai_document_metadata_loader_tests
-            ${CMAKE_CURRENT_SOURCE_DIR}/data/metadata/theory_of_computer_science.json
 )
 
 # Standalone document ingestion and retrieval demonstration
@@ -101,5 +125,6 @@ target_link_libraries(dukeai_demo PRIVATE dukeai_energy)
 
 add_test(
     NAME retrieval_demo_test
-    COMMAND dukeai_demo ${CMAKE_CURRENT_SOURCE_DIR}/data/demo
+    COMMAND dukeai_demo
+            ${CMAKE_CURRENT_SOURCE_DIR}/data/demo
 )
