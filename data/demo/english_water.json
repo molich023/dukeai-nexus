@@ -1,0 +1,12 @@
+{
+  "source_id": "dukeai_demo_water_en_001",
+  "title": "Water Conservation — English Demonstration",
+  "language": "English",
+  "subject": ["Water", "Environment", "Public Health"],
+  "rights_status": "UNVERIFIED",
+  "redistribution_allowed": false,
+  "public_training_use": false,
+  "local_research_use": "Prototype demonstration; human review pending.",
+  "extraction_status": "COMPLETED",
+  "review_status": "PENDING"
+}
