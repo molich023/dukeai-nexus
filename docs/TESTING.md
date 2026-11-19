@@ -1,18 +1,19 @@
-# DukeAI Nexus Testing Guide
+# DukeAI Nexus Testing Strategy
+
+**Last verified:** 19 November 2026  
+**Verified environment:** Android Termux
 
 ## 1. Purpose
 
-This document describes how to build, test, and evaluate DukeAI Nexus.
+This document describes how to configure, build, test, and evaluate DukeAI Nexus.
 
 The project uses CMake for build configuration and CTest for automated testing.
 
-The current prototype has been built and tested in an Android Termux environment.
+The current C++17 prototype has been built and tested in an Android Termux environment. Other platforms must be tested independently before being described as verified.
 
-Other platforms should be tested independently before being described as verified.
+## 2. Development Requirements
 
-## 2. Requirements
-
-Required development tools:
+Required tools:
 
 - C++17-compatible compiler.
 - CMake.
@@ -20,7 +21,7 @@ Required development tools:
 - JsonCpp.
 - Git.
 
-On Android, use Termux.
+On Android, the development environment is Termux.
 
 ## 3. Termux Setup
 
@@ -54,11 +55,13 @@ From the project root:
 cmake -S . -B build
 ```
 
-Build the project:
+Build:
 
 ```bash
-cmake --build build
+cmake --build build -j2
 ```
+
+A successful build should complete without compiler or linker errors.
 
 ## 5. Run Automated Tests
 
@@ -68,7 +71,13 @@ Run all registered tests:
 ctest --test-dir build --output-on-failure
 ```
 
-The test suite should be reviewed whenever code changes are introduced.
+The test suite should be run against the current source revision after relevant code changes.
+
+List registered tests:
+
+```bash
+ctest --test-dir build -N
+```
 
 ## 6. Run the Retrieval Demonstration
 
@@ -78,130 +87,212 @@ After a successful build:
 ./build/dukeai_demo data/demo
 ```
 
-The demonstration uses English and Kiswahili water-conservation examples.
+The demonstration uses developer-authored English and Kiswahili water-conservation examples.
 
-It retrieves existing passages from source documents.
+It demonstrates local document ingestion, passage retrieval, and source provenance.
 
-It does not generate AI answers.
+It does not generate AI answers or translate documents.
 
-## 7. Current Test Coverage
+The current demonstration uses lexical candidate selection and an untrained ranker with deterministic fallback behaviour.
 
-The verified test suite contains eight registered tests:
+The sample language material has not received independent linguistic review. Its metadata records review as pending and rights as unverified.
+
+## 7. Current Automated Test Coverage
+
+The verified CTest suite contains eight registered tests:
 
 1. `ranker_smoke_test`
+   - Energy calculation.
+   - Pairwise margin-ranking training.
+   - Synthetic training fixture.
+
 2. `text_processing_test`
+   - ASCII case normalisation.
+   - Tokenisation.
+   - Repeated terms.
+   - Document and title overlap features.
+   - Language-tag matching.
+   - Empty-input handling.
+
 3. `retrieval_test`
+   - Paragraph-based segmentation.
+   - Lexical candidate retrieval.
+   - Source and passage identification.
+   - File path and file-size provenance.
+   - Duplicate-document rejection.
+   - Metadata-aware ingestion.
+
 4. `document_loader_test`
+   - Local text-document loading.
+   - Input validation and rejection cases.
+
 5. `document_metadata_test`
+   - Structured metadata validation.
+   - Required-field and consistency checks.
+
 6. `document_ingestion_test`
+   - Successful ingestion.
+   - Malformed metadata rejection.
+   - Missing text-file rejection.
+   - Duplicate-source rejection.
+   - Index integrity after rejected ingestion.
+   - Filesystem-boundary validation.
+
 7. `document_metadata_loader_test`
+   - JSON metadata parsing and validation.
+
 8. `retrieval_demo_test`
+   - End-to-end demonstration using two developer-authored sample documents.
+   - English and Kiswahili lexical queries.
+   - Passage retrieval and source provenance.
 
-The project has previously completed a run with eight passing tests and zero failures.
+## 8. Latest Verified Test Results
 
-Test results may change as the implementation evolves. Always run the tests against the current source revision.
+**Verification date:** 19 November 2026  
+**Environment:** Android Termux
 
-## 8. Component Testing Areas
+The project was rebuilt and tested against the current local source.
 
-### 8.1 Text Processing
+| Verification | Result |
+|---|---|
+| CMake build | Successful |
+| Registered CTest tests | 8 passed |
+| CTest failures | 0 |
+| Direct ingestion security checks | 29 passed |
+| Total CTest duration | 0.10 seconds |
+| `git diff --check` | Clean |
 
-Test:
+The direct security test reported:
 
-- Tokenisation.
-- ASCII lowercase handling.
-- Whitespace separation.
-- Punctuation separation.
-- Feature extraction.
+```text
+PASS: successful ingestion and provenance
+PASS: malformed metadata rejection
+PASS: missing text file rejection
+PASS: duplicate ingestion rejection
+PASS: filesystem boundary tests
+PASS: all document ingestion tests (29 checks)
+```
 
-Limitations:
+The complete CTest suite reported:
 
-- Full Unicode normalisation is not implemented.
-- Language-specific morphological processing is not implemented.
+```text
+100% tests passed, 0 tests failed out of 8
+Total Test time (real) = 0.10 sec
+```
 
-### 8.2 Document Loading
+These results describe the tested source revision and Termux environment. They are not independent production benchmarks or a guarantee of correctness on other platforms.
 
-Test:
+## 9. Filesystem Boundary Security Testing
 
-- Valid local files.
-- Missing files.
-- Empty files.
-- File type checks.
-- Bounded reads.
-- Oversized files.
-- File I/O failures.
+The `DocumentIngestion` coordinator enforces an approved filesystem directory for document and metadata inputs.
 
-### 8.3 Metadata Validation
+The direct test command is:
 
-Test:
+```bash
+./build/dukeai_document_ingestion_tests
+```
 
-- Valid metadata.
-- Missing required fields.
-- Incorrect field types.
-- Unknown fields.
-- Duplicate keys.
-- Invalid rights combinations.
-- Conflicting metadata.
+The security test group covers:
 
-### 8.4 Retrieval
+- Successful ingestion from the approved directory.
+- Rejection of absolute document paths outside the approved directory.
+- Rejection of absolute metadata paths outside the approved directory.
+- Rejection of relative directory traversal for document paths.
+- Rejection of relative directory traversal for metadata paths.
+- Rejection of symbolic links resolving outside the approved directory, where symlink creation is supported.
+- Confirmation that rejected inputs do not add passages to the retriever.
+- Successful ingestion of valid files inside the approved directory.
 
-Test:
+The implementation uses canonical-path resolution and component-wise directory containment checks.
 
-- Query-term overlap.
-- Title overlap.
-- Language filtering.
-- Candidate selection.
-- Deterministic ranking.
-- Empty and unmatched queries.
-- Source and passage identification.
+**Important limitations:**
 
-### 8.5 Energy-Based Ranking
+- The boundary is enforced through `DocumentIngestion`, not automatically by every standalone loader call.
+- Canonical-path checks do not eliminate TOCTOU races.
+- A successful test run is not a complete security audit or certification.
+- Filesystem behaviour should be verified independently on each supported operating system.
 
-Test:
+See [SECURITY_TEST_EVIDENCE.md](SECURITY_TEST_EVIDENCE.md) for the detailed milestone record.
 
-- Ranker construction.
-- Synthetic training fixtures.
-- Pairwise margin-training behaviour.
-- Deterministic fallback behaviour.
+## 10. Demonstration Limitations
 
-Synthetic tests do not establish real-world ranking effectiveness.
+The current demonstration uses:
 
-## 9. Code Quality Checks
+- Two developer-authored sample documents.
+- English and Kiswahili language labels.
+- Paragraph-based passage segmentation.
+- Lexical candidate selection.
+- Source and passage provenance.
 
-Before submitting changes:
+The ranker is untrained during the demonstration and uses deterministic fallback behaviour.
+
+The demonstration does not establish trained ranking performance, semantic retrieval quality, or language-model capabilities.
+
+## 11. Current Testing Limitations
+
+The current testing record does not establish:
+
+- An independently curated and validated English/Kiswahili corpus.
+- Independent held-out retrieval benchmarks.
+- Demonstrated semantic or vector retrieval.
+- Stemming or morphological analysis.
+- Full Unicode normalisation.
+- Machine translation quality.
+- Natural-language answer-generation quality.
+- Production model serialization.
+- A production Android or Linux graphical interface.
+- Independent Linux build and test results.
+- Production-scale memory or latency performance.
+- Complete security assurance.
+
+## 12. Future Testing Priorities
+
+Future testing should include:
+
+- Human review of language samples.
+- Rights and licence verification for external resources.
+- Held-out retrieval evaluation.
+- Retrieval precision and recall measurements.
+- Ranking evaluation beyond synthetic training fixtures.
+- Unicode and multilingual text-processing tests.
+- Kiswahili-specific linguistic evaluation.
+- Larger document collections.
+- Android and Linux cross-platform builds.
+- Memory and latency measurements.
+- Large-file and long-running stability tests.
+- Independent security and privacy review.
+- Additional malformed-input and adversarial testing.
+- Filesystem race-condition testing.
+- Descriptor-relative file access tests.
+- Adversarial symlink and path-replacement scenarios.
+
+Future evaluation goals must not be presented as completed capabilities.
+
+## 13. Code Quality and Change Review
+
+Before submitting changes, run:
 
 ```bash
 git diff --check
 ```
 
-Review the modified files:
+Review the working tree:
 
 ```bash
 git status --short
 ```
 
-Review changes:
+Review tracked changes:
 
 ```bash
 git diff
 ```
 
-## 10. Future Testing Priorities
+Review untracked files separately because `git diff` does not display their contents.
 
-Future testing should include:
+Do not stage, commit, or submit unrelated files as part of a security change.
 
-- Unicode and multilingual text processing.
-- Kiswahili-specific linguistic evaluation.
-- Larger document collections.
-- Independent retrieval benchmarks.
-- Held-out evaluation data.
-- Memory usage.
-- Processing latency.
-- Large-file behaviour.
-- Android and Linux cross-platform builds.
-- Long-running stability tests.
-- Security and malformed-input testing.
-
-## 11. Reporting Test Results
+## 14. Reporting Test Results
 
 Contributors should report:
 
@@ -211,13 +302,20 @@ Contributors should report:
 - CMake version.
 - Build result.
 - Test result.
+- Any skipped tests.
 - Relevant errors.
 - Known limitations.
 
 Do not claim a platform has been verified unless the tests have actually been run on that platform.
 
-## 12. Testing Commitment
+Distinguish synthetic fixtures from independent datasets, lexical retrieval from semantic retrieval, and source-text retrieval from generated answers.
 
-DukeAI Nexus aims to maintain reproducible, transparent and independently reviewable testing practices.
+Preserve document provenance and rights status. Do not claim community validation without evidence.
 
-**A passing test suite demonstrates tested behaviour, not complete correctness or production readiness.**
+## 15. Testing Commitment
+
+DukeAI Nexus aims to maintain reproducible, transparent, and independently reviewable testing practices.
+
+A passing test suite demonstrates tested behaviour, not complete correctness or production readiness.
+
+**Our Languages. Our Heritage. Our Future.**
