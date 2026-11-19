@@ -1,3 +1,4 @@
+
 #include "dukeai/document_ingestion.hpp"
 #include "dukeai/energy_ranker.hpp"
 #include "dukeai/retriever.hpp"
@@ -14,6 +15,7 @@ int checks = 0;
 
 void check(bool condition, const std::string& message) {
     ++checks;
+
     if (!condition) {
         throw std::runtime_error(message);
     }
@@ -24,13 +26,17 @@ void write_file(
     const std::string& content) {
 
     std::ofstream output(path, std::ios::binary);
+
     if (!output) {
-        throw std::runtime_error("Cannot create test file: " + path.string());
+        throw std::runtime_error(
+            "Cannot create test file: " + path.string());
     }
 
     output << content;
+
     if (!output) {
-        throw std::runtime_error("Cannot write test file: " + path.string());
+        throw std::runtime_error(
+            "Cannot write test file: " + path.string());
     }
 }
 
@@ -92,7 +98,8 @@ void test_successful_ingestion(
 
     dukeai::DocumentIngestion ingestion(
         document_loader,
-        metadata_loader);
+        metadata_loader,
+        directory.path());
 
     ingestion.ingest(
         text_path.string(),
@@ -108,7 +115,9 @@ void test_successful_ingestion(
         "English",
         10);
 
-    check(!results.empty(), "Ingested content should be searchable.");
+    check(
+        !results.empty(),
+        "Ingested content should be searchable.");
 
     for (const auto& result : results) {
         check(
@@ -135,10 +144,16 @@ void test_successful_ingestion(
 void test_malformed_metadata(
     const TemporaryDirectory& directory) {
 
-    const auto text_path = directory.path() / "malformed_content.txt";
-    const auto metadata_path = directory.path() / "malformed.json";
+    const auto text_path =
+        directory.path() / "malformed_content.txt";
 
-    write_file(text_path, "A sample document about computation.");
+    const auto metadata_path =
+        directory.path() / "malformed.json";
+
+    write_file(
+        text_path,
+        "A sample document about computation.");
+
     write_file(metadata_path, "{ invalid JSON ");
 
     dukeai::EnergyRanker ranker;
@@ -148,7 +163,8 @@ void test_malformed_metadata(
 
     dukeai::DocumentIngestion ingestion(
         document_loader,
-        metadata_loader);
+        metadata_loader,
+        directory.path());
 
     bool rejected = false;
 
@@ -161,7 +177,10 @@ void test_malformed_metadata(
         rejected = true;
     }
 
-    check(rejected, "Malformed metadata must be rejected.");
+    check(
+        rejected,
+        "Malformed metadata must be rejected.");
+
     check(
         retriever.passage_count() == 0,
         "Malformed metadata must not modify the index.");
@@ -172,8 +191,11 @@ void test_malformed_metadata(
 void test_missing_text_file(
     const TemporaryDirectory& directory) {
 
-    const auto missing_path = directory.path() / "missing.txt";
-    const auto metadata_path = directory.path() / "missing_text.json";
+    const auto missing_path =
+        directory.path() / "missing.txt";
+
+    const auto metadata_path =
+        directory.path() / "missing_text.json";
 
     write_file(metadata_path, valid_metadata);
 
@@ -184,7 +206,8 @@ void test_missing_text_file(
 
     dukeai::DocumentIngestion ingestion(
         document_loader,
-        metadata_loader);
+        metadata_loader,
+        directory.path());
 
     bool rejected = false;
 
@@ -197,7 +220,10 @@ void test_missing_text_file(
         rejected = true;
     }
 
-    check(rejected, "Missing text file must be rejected.");
+    check(
+        rejected,
+        "Missing text file must be rejected.");
+
     check(
         retriever.passage_count() == 0,
         "Missing text file must not modify the index.");
@@ -208,8 +234,11 @@ void test_missing_text_file(
 void test_duplicate_ingestion(
     const TemporaryDirectory& directory) {
 
-    const auto text_path = directory.path() / "duplicate.txt";
-    const auto metadata_path = directory.path() / "duplicate.json";
+    const auto text_path =
+        directory.path() / "duplicate.txt";
+
+    const auto metadata_path =
+        directory.path() / "duplicate.json";
 
     write_file(
         text_path,
@@ -224,14 +253,16 @@ void test_duplicate_ingestion(
 
     dukeai::DocumentIngestion ingestion(
         document_loader,
-        metadata_loader);
+        metadata_loader,
+        directory.path());
 
     ingestion.ingest(
         text_path.string(),
         metadata_path.string(),
         retriever);
 
-    const std::size_t original_count = retriever.passage_count();
+    const std::size_t original_count =
+        retriever.passage_count();
 
     bool rejected = false;
 
@@ -244,13 +275,186 @@ void test_duplicate_ingestion(
         rejected = true;
     }
 
-    check(rejected, "Duplicate source ingestion must be rejected.");
+    check(
+        rejected,
+        "Duplicate source ingestion must be rejected.");
 
     check(
         retriever.passage_count() == original_count,
         "Duplicate ingestion must not change the existing index.");
 
     std::cout << "PASS: duplicate ingestion rejection\n";
+}
+
+void test_filesystem_boundary(
+    const TemporaryDirectory& directory) {
+
+    const auto outside_directory =
+        directory.path().parent_path() /
+        (directory.path().filename().string() + "_outside");
+
+    std::filesystem::remove_all(outside_directory);
+    std::filesystem::create_directories(outside_directory);
+
+    try {
+        const auto inside_text =
+            directory.path() / "boundary.txt";
+
+        const auto inside_metadata =
+            directory.path() / "boundary.json";
+
+        const auto outside_text =
+            outside_directory / "outside.txt";
+
+        const auto outside_metadata =
+            outside_directory / "outside.json";
+
+        write_file(
+            inside_text,
+            "A document inside the approved directory.");
+
+        write_file(inside_metadata, valid_metadata);
+
+        write_file(
+            outside_text,
+            "This document is outside the approved directory.");
+
+        write_file(outside_metadata, valid_metadata);
+
+        dukeai::EnergyRanker ranker;
+        dukeai::Retriever retriever(ranker);
+        dukeai::DocumentLoader document_loader;
+        dukeai::DocumentMetadataLoader metadata_loader;
+
+        dukeai::DocumentIngestion ingestion(
+            document_loader,
+            metadata_loader,
+            directory.path());
+
+        const auto expect_boundary_rejection =
+            [&](const std::string& text_path,
+                const std::string& metadata_path,
+                const std::string& description) {
+
+                bool rejected = false;
+
+                try {
+                    ingestion.ingest(
+                        text_path,
+                        metadata_path,
+                        retriever);
+                } catch (const std::exception&) {
+                    rejected = true;
+                }
+
+                check(rejected, description);
+
+                check(
+                    retriever.passage_count() == 0,
+                    description + " must not modify the index.");
+            };
+
+        expect_boundary_rejection(
+            outside_text.string(),
+            inside_metadata.string(),
+            "Absolute document path outside approved root rejected");
+
+        expect_boundary_rejection(
+            inside_text.string(),
+            outside_metadata.string(),
+            "Absolute metadata path outside approved root rejected");
+
+        const auto traversal_text =
+            directory.path() / ".." /
+            outside_directory.filename() /
+            outside_text.filename();
+
+        expect_boundary_rejection(
+            traversal_text.string(),
+            inside_metadata.string(),
+            "Document path traversal rejected");
+
+        const auto traversal_metadata =
+            directory.path() / ".." /
+            outside_directory.filename() /
+            outside_metadata.filename();
+
+        expect_boundary_rejection(
+            inside_text.string(),
+            traversal_metadata.string(),
+            "Metadata path traversal rejected");
+
+        // A symlink inside the approved root must not expose an
+        // external file through the ingestion interface.
+        const auto text_symlink =
+            directory.path() / "external_link.txt";
+
+        std::error_code symlink_error;
+
+        std::filesystem::create_symlink(
+            outside_text,
+            text_symlink,
+            symlink_error);
+
+        if (!symlink_error) {
+            expect_boundary_rejection(
+                text_symlink.string(),
+                inside_metadata.string(),
+                "Symlink to external document rejected");
+        } else {
+            std::cout
+                << "SKIP: document symlink test unavailable: "
+                << symlink_error.message() << '\n';
+        }
+
+        const auto metadata_symlink =
+            directory.path() / "external_link.json";
+
+        symlink_error.clear();
+
+        std::filesystem::create_symlink(
+            outside_metadata,
+            metadata_symlink,
+            symlink_error);
+
+        if (!symlink_error) {
+            expect_boundary_rejection(
+                inside_text.string(),
+                metadata_symlink.string(),
+                "Symlink to external metadata rejected");
+        } else {
+            std::cout
+                << "SKIP: metadata symlink test unavailable: "
+                << symlink_error.message() << '\n';
+        }
+
+        // Confirm that ordinary in-root ingestion still works.
+        ingestion.ingest(
+            inside_text.string(),
+            inside_metadata.string(),
+            retriever);
+
+        check(
+            retriever.passage_count() > 0,
+            "Valid in-root files remain ingestible.");
+
+        std::cout << "PASS: filesystem boundary tests\n";
+
+    } catch (...) {
+        std::error_code cleanup_error;
+
+        std::filesystem::remove_all(
+            outside_directory,
+            cleanup_error);
+
+        throw;
+    }
+
+    std::error_code cleanup_error;
+
+    std::filesystem::remove_all(
+        outside_directory,
+        cleanup_error);
 }
 
 } // namespace
@@ -263,11 +467,13 @@ int main() {
         test_malformed_metadata(directory);
         test_missing_text_file(directory);
         test_duplicate_ingestion(directory);
+        test_filesystem_boundary(directory);
 
         std::cout << "PASS: all document ingestion tests ("
                   << checks << " checks)\n";
 
         return 0;
+
     } catch (const std::exception& error) {
         std::cerr << "FAIL: " << error.what() << '\n';
         return 1;
