@@ -57,8 +57,10 @@ cmake -S . -B build
 Build the project:
 
 ```bash
-cmake --build build
+cmake --build build -j2
 ```
+
+A successful build should complete without compiler or linker errors.
 
 ## 5. Run Automated Tests
 
@@ -84,6 +86,8 @@ It retrieves existing passages from source documents.
 
 It does not generate AI answers.
 
+The current demonstration uses lexical candidate selection and an untrained ranker with a deterministic fallback.
+
 ## 7. Current Test Coverage
 
 The verified test suite contains eight registered tests:
@@ -97,7 +101,9 @@ The verified test suite contains eight registered tests:
 7. `document_metadata_loader_test`
 8. `retrieval_demo_test`
 
-The project has previously completed a run with eight passing tests and zero failures.
+The latest recorded test run completed with eight passing tests and zero failures.
+
+The direct document ingestion test executable also completed successfully with twenty-nine checks.
 
 Test results may change as the implementation evolves. Always run the tests against the current source revision.
 
@@ -165,6 +171,46 @@ Test:
 
 Synthetic tests do not establish real-world ranking effectiveness.
 
+### 8.6 Document Ingestion and Filesystem Security
+
+The ingestion coordinator enforces an approved filesystem directory for document and metadata inputs.
+
+The security tests cover:
+
+- Successful ingestion from the approved directory.
+- Rejection of document paths outside the approved directory.
+- Rejection of metadata paths outside the approved directory.
+- Rejection of relative directory traversal.
+- Rejection of symbolic links resolving outside the approved directory, where symlink creation is supported.
+- Confirmation that rejected inputs do not add passages to the retriever.
+- Successful ingestion of valid files inside the approved directory.
+
+The direct test command is:
+
+```bash
+./build/dukeai_document_ingestion_tests
+```
+
+The latest recorded output included:
+
+```text
+PASS: successful ingestion and provenance
+PASS: malformed metadata rejection
+PASS: missing text file rejection
+PASS: duplicate ingestion rejection
+PASS: filesystem boundary tests
+PASS: all document ingestion tests (29 checks)
+```
+
+The implementation uses canonical-path resolution and component-wise directory containment checks.
+
+**Important limitations:**
+
+- The boundary is enforced through `DocumentIngestion`, not by every standalone loader call.
+- Canonical-path checks do not eliminate TOCTOU races.
+- A successful test run does not constitute a complete security audit or certification.
+- Filesystem behaviour should be verified independently on each supported operating system.
+
 ## 9. Code Quality Checks
 
 Before submitting changes:
@@ -185,6 +231,8 @@ Review changes:
 git diff
 ```
 
+Do not stage or commit unrelated files as part of a security change.
+
 ## 10. Future Testing Priorities
 
 Future testing should include:
@@ -199,7 +247,10 @@ Future testing should include:
 - Large-file behaviour.
 - Android and Linux cross-platform builds.
 - Long-running stability tests.
-- Security and malformed-input testing.
+- Additional security and malformed-input testing.
+- Filesystem race-condition testing.
+- Descriptor-relative file access tests.
+- Testing against adversarial symlink and path replacement scenarios.
 
 ## 11. Reporting Test Results
 
