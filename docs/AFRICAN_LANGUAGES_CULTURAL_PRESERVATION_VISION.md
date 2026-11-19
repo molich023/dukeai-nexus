@@ -26,7 +26,9 @@ Technology can help address some of these challenges, but it must be developed r
 
 ## 3. Initial Research Focus
 
-The first technical focus is English and Kiswahili civic and scientific learning.
+The first technical focus is English and Kiswahili civic and Focu
+
+ cientific learning.
 
 The current prototype supports local document ingestion and lexical retrieval using demonstration material in these languages.
 
@@ -47,6 +49,41 @@ Potential research directions include:
 - Locally executable language technology.
 
 Future language work should be developed with speakers, linguists, educators, translators, and relevant communities.
+
+### 4.1 ## Public-Service Communication and Local-Language Accessibility
+
+### Making public information understandable to the communities it serves
+
+DukeAI Nexus envisions supporting governments, public institutions, educational organisations, local administrations and community-based organisations in making important information more accessible across African languages.
+
+A significant communication challenge arises when public information is prepared primarily in English, while the people who need to understand and act on it communicate more comfortably in Kiswahili or other local languages and dialects. This can affect access to education, public services, civic participation, community development information and government announcements.
+
+The long-term vision is to develop tools that can assist with translating and adapting approved English-language documents into relevant local languages, while preserving the meaning, context and intent of the original information.
+
+Potential applications include:
+
+- **Government communication:** Translating public announcements, service information, policy summaries and community notices into locally understood languages.
+- **Local administration:** Supporting communication between chiefs, assistant chiefs, village elders and residents through translated meeting notices, public briefings and community announcements.
+- **Community noticeboards:** Making essential notices available in English, Kiswahili and appropriate local languages so that more residents can understand them.
+- **Education:** Helping schools, teachers and education authorities make learning materials, instructions and public education information more accessible to multilingual communities.
+- **Public health and safety communication:** Supporting the preparation of understandable local-language versions of approved public information, subject to expert review.
+- **Civic participation:** Helping residents understand public consultations, community meetings, civic information and government service procedures.
+
+### Human review, accuracy and cultural respect
+
+Translation of public information carries significant responsibility. A mistranslated government instruction, health notice, legal explanation or emergency announcement could cause confusion or harm.
+
+DukeAI Nexus therefore aims to adopt a human-reviewed translation approach. Translations intended for official or high-impact communication should be checked by qualified translators, knowledgeable local-language speakers or authorised subject-matter reviewers before publication.
+
+The project will seek to respect differences between languages, dialects, regional expressions and cultural contexts. It will not assume that one translation or dialect is appropriate for every community. Local speakers and community representatives should participate in decisions about terminology, meaning, pronunciation, cultural sensitivity and acceptable use of language resources.
+
+### Proposed development direction
+
+The current DukeAI Nexus prototype supports local document ingestion, metadata validation, text processing, retrieval and ranking of source passages. It does not yet provide general-purpose document translation.
+
+Future research and development will investigate multilingual document processing, English-to-Kiswahili translation, additional African-language support, dialect-sensitive terminology and human evaluation workflows.
+
+The intended outcome is a locally relevant, privacy-conscious and open-source technology that can help public institutions and communities communicate more inclusively, without replacing professional translators, local knowledge holders or public accountability.
 
 ## 5. Cultural Heritage and Creative Expression
 
