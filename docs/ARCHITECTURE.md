@@ -22,6 +22,7 @@ The project follows these architectural principles:
 - Resource-aware processing.
 - Modular C++ implementation.
 - Testable and reproducible components.
+- Filesystem boundary enforcement at the document ingestion interface.
 - Clear separation between implemented functionality and research proposals.
 
 ## 3. Technology Stack
@@ -41,6 +42,12 @@ The current processing pipeline is:
 
 ```text
 Local Documents
+      |
+      v
+Approved Data Directory
+      |
+      v
+Filesystem Boundary Validation
       |
       v
 Document Loading
@@ -120,11 +127,34 @@ Current tokenisation behaviour includes:
 
 This is not a complete multilingual linguistic processing system.
 
-### 5.4 Document Ingestion
+### 5.4 Document Ingestion and Filesystem Boundary
 
 Document ingestion connects local document loading, metadata processing, validation, and preparation for retrieval.
 
-It provides a structured route for introducing locally stored documents into the prototype.
+The ingestion coordinator now requires an approved data directory.
+
+Before either document or metadata content is read, the coordinator:
+
+- Resolves the approved directory to its canonical filesystem path.
+- Confirms that the approved path is an existing directory.
+- Resolves both requested input paths.
+- Checks that both resolved paths remain within the approved directory.
+- Rejects paths that resolve outside the approved directory.
+- Confirms that both inputs refer to regular files.
+
+The boundary is designed to reject:
+
+- Absolute paths outside the approved directory.
+- Relative directory traversal, including `../` escapes.
+- Symbolic links that resolve outside the approved directory.
+
+Both paths are checked before either loader reads the corresponding file.
+
+The existing document and metadata loaders retain their standalone interfaces. The filesystem boundary described here is enforced by the `DocumentIngestion` coordinator; direct use of the standalone loaders does not automatically inherit this restriction.
+
+**Security limitation:** canonical-path validation does not eliminate time-of-check/time-of-use (TOCTOU) races. A filesystem entry could theoretically change between path validation and file opening. Further hardening may use descriptor-relative operations such as POSIX `openat` and appropriate symlink protections.
+
+This improvement is a tested filesystem boundary for the ingestion interface, not a claim of complete filesystem isolation or production-grade security certification.
 
 ### 5.5 Lexical Retrieval
 
@@ -173,6 +203,8 @@ The current prototype does not implement:
 - Multimodal document understanding.
 - JEPA or world-model architectures.
 - A production Android or Linux graphical interface.
+- Complete filesystem sandboxing.
+- Elimination of filesystem TOCTOU races.
 - Production-grade security certification.
 
 ## 8. Planned Architecture Extensions
@@ -189,6 +221,8 @@ Future research may introduce:
 8. User interfaces for Android and Linux.
 9. Community-reviewed language resources.
 10. Multimodal knowledge processing.
+11. Descriptor-relative filesystem access and stronger protection against filesystem race conditions.
+12. Expanded adversarial and security testing.
 
 These are research directions, not current capabilities.
 
@@ -200,9 +234,25 @@ The standard build and test commands are:
 
 ```bash
 cmake -S . -B build
-cmake --build build
+cmake --build build -j2
 ctest --test-dir build --output-on-failure
 ```
+
+The document ingestion security tests can also be executed directly:
+
+```bash
+./build/dukeai_document_ingestion_tests
+```
+
+The latest recorded verification completed with:
+
+- Successful compilation.
+- Eight of eight registered CTest tests passing.
+- Twenty-nine document ingestion checks passing.
+- A successful English and Kiswahili retrieval demonstration.
+- A clean `git diff --check`.
+
+These results describe the tested source revision and environment, not a guarantee of correctness on every platform.
 
 See [TESTING.md](TESTING.md) for testing details.
 
