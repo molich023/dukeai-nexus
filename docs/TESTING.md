@@ -100,10 +100,18 @@ The verified test suite contains eight registered tests:
 The project has previously completed a run with eight passing tests and zero failures.
 
 Test results may change as the implementation evolves. Always run the tests against the current source revision.
+## 8. Security Test Evidence
 
-## 8. Component Testing Areas
+The filesystem boundary security milestone and its recorded verification results are documented in:
 
-### 8.1 Text Processing
+[SECURITY_TEST_EVIDENCE.md](SECURITY_TEST_EVIDENCE.md)
+
+The evidence includes the implementation scope, test environment, automated test results, reproduction commands, and known security limitations.
+
+The evidence applies to the recorded Android Termux test run and should be updated whenever relevant implementation changes are made.
+## 9. Component Testing Areas
+
+### 9.1 Text Processing
 
 Test:
 
@@ -118,7 +126,7 @@ Limitations:
 - Full Unicode normalisation is not implemented.
 - Language-specific morphological processing is not implemented.
 
-### 8.2 Document Loading
+### 9.2 Document Loading
 
 Test:
 
@@ -130,7 +138,7 @@ Test:
 - Oversized files.
 - File I/O failures.
 
-### 8.3 Metadata Validation
+### 9.3 Metadata Validation
 
 Test:
 
@@ -142,7 +150,7 @@ Test:
 - Invalid rights combinations.
 - Conflicting metadata.
 
-### 8.4 Retrieval
+### 9.4 Retrieval
 
 Test:
 
@@ -154,7 +162,7 @@ Test:
 - Empty and unmatched queries.
 - Source and passage identification.
 
-### 8.5 Energy-Based Ranking
+### 9.5 Energy-Based Ranking
 
 Test:
 
@@ -165,7 +173,7 @@ Test:
 
 Synthetic tests do not establish real-world ranking effectiveness.
 
-## 9. Code Quality Checks
+## 10. Code Quality Checks
 
 Before submitting changes:
 
@@ -185,7 +193,7 @@ Review changes:
 git diff
 ```
 
-## 10. Future Testing Priorities
+## 11. Future Testing Priorities
 
 Future testing should include:
 
@@ -201,7 +209,7 @@ Future testing should include:
 - Long-running stability tests.
 - Security and malformed-input testing.
 
-## 11. Reporting Test Results
+## 12. Reporting Test Results
 
 Contributors should report:
 
@@ -216,7 +224,7 @@ Contributors should report:
 
 Do not claim a platform has been verified unless the tests have actually been run on that platform.
 
-## 12. Testing Commitment
+## 13. Testing Commitment
 
 DukeAI Nexus aims to maintain reproducible, transparent and independently reviewable testing practices.
 
