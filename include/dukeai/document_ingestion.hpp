@@ -1,21 +1,22 @@
+
 #pragma once
 
 #include "dukeai/document_loader.hpp"
 #include "dukeai/document_metadata_loader.hpp"
 #include "dukeai/retriever.hpp"
 
+#include <filesystem>
 #include <string>
 
 namespace dukeai {
 
 class DocumentIngestion {
 public:
-    // Both loaders must outlive this coordinator.
     DocumentIngestion(
         const DocumentLoader& document_loader,
-        const DocumentMetadataLoader& metadata_loader);
+        const DocumentMetadataLoader& metadata_loader,
+        const std::filesystem::path& approved_root);
 
-    // Loads, validates and indexes one document.
     void ingest(
         const std::string& text_file,
         const std::string& metadata_file,
@@ -24,6 +25,7 @@ public:
 private:
     const DocumentLoader& document_loader_;
     const DocumentMetadataLoader& metadata_loader_;
+    std::filesystem::path approved_root_;
 };
 
 } // namespace dukeai
