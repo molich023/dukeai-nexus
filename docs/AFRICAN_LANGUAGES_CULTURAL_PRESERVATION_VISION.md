@@ -50,7 +50,7 @@ Potential research directions include:
 
 Future language work should be developed with speakers, linguists, educators, translators, and relevant communities.
 
-### 4.1 ## Public-Service Communication and Local-Language Accessibility
+### 4.1 Public-Service Communication and Local-Language Accessibility
 
 ### Making public information understandable to the communities it serves
 
