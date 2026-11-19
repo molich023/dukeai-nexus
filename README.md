@@ -124,7 +124,7 @@ Public availability of this repository does not automatically grant permission t
 
 All external research materials must be reviewed for copyright, licensing, attribution, redistribution rights, and permitted use.
 
-Review [`docs/DATA_GOVERNANCE.md`](docs/DATA_GOVERNANCE.md) before adding research materials.
+Review [`docs/DATA_GOVERNANCE.md`](docs/Data_Governance.md) before adding research materials.
 
 ## Contributing
 
@@ -138,7 +138,7 @@ Please ensure that contributions include:
 - Respect for copyright, licensing and data governance requirements.
 - Honest descriptions of implemented capabilities and limitations.
 
-See [`docs/TESTING.md`](docs/TESTING.md) for testing guidance.
+See [`docs/Testing.md`](docs/Testing.md) for testing guidance.
 
 ## Platform Support
 
