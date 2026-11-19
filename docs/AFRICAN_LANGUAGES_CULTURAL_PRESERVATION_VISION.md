@@ -1,6 +1,6 @@
 # African Languages and Cultural Preservation Vision
 
-## 1. Vision
+## 1. Dubut
 
 DukeAI Nexus aims to contribute to the preservation, accessibility, and responsible development of African languages and cultural knowledge through open-source technology and community-centred research.
 
@@ -50,7 +50,7 @@ Potential research directions include:
 
 Future language work should be developed with speakers, linguists, educators, translators, and relevant communities.
 
-### 4.1 ## Public-Service Communication and Local-Language Accessibility
+### 4.1 Public-Service Communication and Local-Language Accessibility
 
 ### Making public information understandable to the communities it serves
 
