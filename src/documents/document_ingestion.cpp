@@ -1,5 +1,8 @@
 #include "dukeai/document_ingestion.hpp"
 
+#include <filesystem>
+#include <stdexcept>
+
 namespace dukeai {
 
 DocumentIngestion::DocumentIngestion(
