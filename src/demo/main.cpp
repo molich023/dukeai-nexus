@@ -26,7 +26,8 @@ int main(int argc, char* argv[]) {
 
         dukeai::DocumentIngestion ingestion(
             document_loader,
-            metadata_loader
+            metadata_loader,
+            data_dir
         );
 
         const auto english_text = data_dir / "english_water.txt";
