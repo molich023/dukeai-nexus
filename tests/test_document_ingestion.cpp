@@ -1,3 +1,4 @@
+
 #include "dukeai/document_ingestion.hpp"
 #include "dukeai/energy_ranker.hpp"
 #include "dukeai/retriever.hpp"
@@ -24,13 +25,17 @@ void write_file(
     const std::string& content) {
 
     std::ofstream output(path, std::ios::binary);
+
     if (!output) {
-        throw std::runtime_error("Cannot create test file: " + path.string());
+        throw std::runtime_error(
+            "Cannot create test file: " + path.string());
     }
 
     output << content;
+
     if (!output) {
-        throw std::runtime_error("Cannot write test file: " + path.string());
+        throw std::runtime_error(
+            "Cannot write test file: " + path.string());
     }
 }
 
@@ -92,7 +97,8 @@ void test_successful_ingestion(
 
     dukeai::DocumentIngestion ingestion(
         document_loader,
-        metadata_loader);
+        metadata_loader,
+        directory.path());
 
     ingestion.ingest(
         text_path.string(),
@@ -108,7 +114,8 @@ void test_successful_ingestion(
         "English",
         10);
 
-    check(!results.empty(), "Ingested content should be searchable.");
+    check(!results.empty(),
+          "Ingested content should be searchable.");
 
     for (const auto& result : results) {
         check(
@@ -135,8 +142,11 @@ void test_successful_ingestion(
 void test_malformed_metadata(
     const TemporaryDirectory& directory) {
 
-    const auto text_path = directory.path() / "malformed_content.txt";
-    const auto metadata_path = directory.path() / "malformed.json";
+    const auto text_path =
+        directory.path() / "malformed_content.txt";
+
+    const auto metadata_path =
+        directory.path() / "malformed.json";
 
     write_file(text_path, "A sample document about computation.");
     write_file(metadata_path, "{ invalid JSON ");
@@ -148,7 +158,8 @@ void test_malformed_metadata(
 
     dukeai::DocumentIngestion ingestion(
         document_loader,
-        metadata_loader);
+        metadata_loader,
+        directory.path());
 
     bool rejected = false;
 
@@ -162,6 +173,7 @@ void test_malformed_metadata(
     }
 
     check(rejected, "Malformed metadata must be rejected.");
+
     check(
         retriever.passage_count() == 0,
         "Malformed metadata must not modify the index.");
@@ -172,8 +184,11 @@ void test_malformed_metadata(
 void test_missing_text_file(
     const TemporaryDirectory& directory) {
 
-    const auto missing_path = directory.path() / "missing.txt";
-    const auto metadata_path = directory.path() / "missing_text.json";
+    const auto missing_path =
+        directory.path() / "missing.txt";
+
+    const auto metadata_path =
+        directory.path() / "missing_text.json";
 
     write_file(metadata_path, valid_metadata);
 
@@ -184,7 +199,8 @@ void test_missing_text_file(
 
     dukeai::DocumentIngestion ingestion(
         document_loader,
-        metadata_loader);
+        metadata_loader,
+        directory.path());
 
     bool rejected = false;
 
@@ -198,6 +214,7 @@ void test_missing_text_file(
     }
 
     check(rejected, "Missing text file must be rejected.");
+
     check(
         retriever.passage_count() == 0,
         "Missing text file must not modify the index.");
@@ -208,8 +225,11 @@ void test_missing_text_file(
 void test_duplicate_ingestion(
     const TemporaryDirectory& directory) {
 
-    const auto text_path = directory.path() / "duplicate.txt";
-    const auto metadata_path = directory.path() / "duplicate.json";
+    const auto text_path =
+        directory.path() / "duplicate.txt";
+
+    const auto metadata_path =
+        directory.path() / "duplicate.json";
 
     write_file(
         text_path,
@@ -224,14 +244,16 @@ void test_duplicate_ingestion(
 
     dukeai::DocumentIngestion ingestion(
         document_loader,
-        metadata_loader);
+        metadata_loader,
+        directory.path());
 
     ingestion.ingest(
         text_path.string(),
         metadata_path.string(),
         retriever);
 
-    const std::size_t original_count = retriever.passage_count();
+    const std::size_t original_count =
+        retriever.passage_count();
 
     bool rejected = false;
 
@@ -244,13 +266,138 @@ void test_duplicate_ingestion(
         rejected = true;
     }
 
-    check(rejected, "Duplicate source ingestion must be rejected.");
+    check(rejected,
+          "Duplicate source ingestion must be rejected.");
 
     check(
         retriever.passage_count() == original_count,
         "Duplicate ingestion must not change the existing index.");
 
     std::cout << "PASS: duplicate ingestion rejection\n";
+}
+
+void test_outside_root_rejection(
+    const TemporaryDirectory& directory) {
+
+    const auto approved_root =
+        directory.path() / "approved";
+
+    const auto outside_root =
+        directory.path() / "outside";
+
+    std::filesystem::create_directories(approved_root);
+    std::filesystem::create_directories(outside_root);
+
+    const auto text_path =
+        outside_root / "outside.txt";
+
+    const auto metadata_path =
+        approved_root / "metadata.json";
+
+    write_file(text_path, "This file is outside the approved root.");
+    write_file(metadata_path, valid_metadata);
+
+    dukeai::EnergyRanker ranker;
+    dukeai::Retriever retriever(ranker);
+    dukeai::DocumentLoader document_loader;
+    dukeai::DocumentMetadataLoader metadata_loader;
+
+    dukeai::DocumentIngestion ingestion(
+        document_loader,
+        metadata_loader,
+        approved_root);
+
+    bool rejected = false;
+
+    try {
+        ingestion.ingest(
+            text_path.string(),
+            metadata_path.string(),
+            retriever);
+    } catch (const std::exception&) {
+        rejected = true;
+    }
+
+    check(rejected,
+          "Files outside the approved root must be rejected.");
+
+    check(
+        retriever.passage_count() == 0,
+        "Outside-root rejection must not modify the index.");
+
+    std::cout << "PASS: outside-root rejection\n";
+}
+
+void test_symlink_escape_rejection(
+    const TemporaryDirectory& directory) {
+
+    const auto approved_root =
+        directory.path() / "symlink_approved";
+
+    const auto outside_root =
+        directory.path() / "symlink_outside";
+
+    std::filesystem::create_directories(approved_root);
+    std::filesystem::create_directories(outside_root);
+
+    const auto outside_text =
+        outside_root / "outside.txt";
+
+    const auto metadata_path =
+        approved_root / "metadata.json";
+
+    const auto linked_text =
+        approved_root / "linked.txt";
+
+    write_file(
+        outside_text,
+        "This file is reached through a symbolic link.");
+
+    write_file(metadata_path, valid_metadata);
+
+    std::error_code error;
+
+    std::filesystem::create_symlink(
+        outside_text,
+        linked_text,
+        error);
+
+    if (error) {
+        std::cout
+            << "SKIP: symlink escape test unavailable: "
+            << error.message() << '\n';
+        return;
+    }
+
+    dukeai::EnergyRanker ranker;
+    dukeai::Retriever retriever(ranker);
+    dukeai::DocumentLoader document_loader;
+    dukeai::DocumentMetadataLoader metadata_loader;
+
+    dukeai::DocumentIngestion ingestion(
+        document_loader,
+        metadata_loader,
+        approved_root);
+
+    bool rejected = false;
+
+    try {
+        ingestion.ingest(
+            linked_text.string(),
+            metadata_path.string(),
+            retriever);
+    } catch (const std::exception&) {
+        rejected = true;
+    }
+
+    check(rejected,
+          "Symlink escape must be rejected.");
+
+    check(
+        retriever.passage_count() == 0,
+        "Symlink rejection must not modify the index.");
+
+    std::cout << "PASS: symlink escape rejection\n";
 }
 
 } // namespace
@@ -263,8 +410,10 @@ int main() {
         test_malformed_metadata(directory);
         test_missing_text_file(directory);
         test_duplicate_ingestion(directory);
+        test_outside_root_rejection(directory);
+        test_symlink_escape_rejection(directory);
 
-        std::cout << "PASS: all document ingestion tests ("
+        std::cout << "PASS: document ingestion tests ("
                   << checks << " checks)\n";
 
         return 0;
