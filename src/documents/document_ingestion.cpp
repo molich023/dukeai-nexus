@@ -4,9 +4,11 @@ namespace dukeai {
 
 DocumentIngestion::DocumentIngestion(
     const DocumentLoader& document_loader,
-    const DocumentMetadataLoader& metadata_loader)
+    const DocumentMetadataLoader& metadata_loader,
+    const std::filesystem::path& approved_root)
     : document_loader_(document_loader),
-      metadata_loader_(metadata_loader) {}
+      metadata_loader_(metadata_loader),
+      approved_root_(canonical_directory(approved_root)) {}
 
 void DocumentIngestion::ingest(
     const std::string& text_file,
